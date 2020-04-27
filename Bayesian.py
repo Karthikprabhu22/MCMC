@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
-from scipy.optimize import fmin
 
 
 def gaussian_likelihood(mean, random_variables):
@@ -27,7 +26,7 @@ def gaussian_likelihood(mean, random_variables):
     return likelihood
 
 
-def uniform_prior(mean):
+def uniform_prior():
     """
     Function to calculate the prior at a given point.
     
@@ -41,7 +40,8 @@ def uniform_prior(mean):
     prior: float
         The likelihood evaluated at mean for the random_variables.
     """
-    prior = np.random.uniform(1, 10)
+    e_guess = 2.7
+    prior = np.random.uniform(e_guess - 1, e_guess + 1)
     return prior
 
 
@@ -61,7 +61,7 @@ def calc_posterior(mean, random_variables):
     posterior: float
         The posterior evaluated at mean for the random_variables.
     """
-    posterior = gaussian_likelihood(mean, random_variables) * uniform_prior(mean)
+    posterior = gaussian_likelihood(mean, random_variables) * uniform_prior()
     return posterior
 
 
@@ -74,7 +74,6 @@ ax.plot(a_values, posterior)
 ax.set(xlabel="a", ylabel="belief", title="Posterior")
 max_y = max(posterior)
 max_x = a_values[posterior.argmax()]
-# plt.text(max_x, max_y, str((max_x, max_y)))
 plt.show()
 
 
