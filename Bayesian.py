@@ -1,6 +1,9 @@
+"""
+MCMC sampler to estimate the value of the mathematical constant e.
+This code uses Metropolis Hastings algorithm for sampling. 
+"""
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import norm
 
 
 def gaussian_likelihood(mean, random_variables):
@@ -12,16 +15,16 @@ def gaussian_likelihood(mean, random_variables):
     mean: float
         Floating point number that specifies the mean 
     
-    random_variables: Numpy array
+    random_variables: array
         Array of floats which are drawn from a normal distribution. 
 
     Returns
     -------
-    likelihood: int
+    likelihood: integer
         The likelihood evaluated at mean for the random_variables.
     """
     length = len(random_variables)
-    normalization = np.sqrt(np.log(mean) / 2 / np.pi) ** length
+    normalization = np.sqrt(np.log(abs(mean)) / 2 / np.pi) ** length
     likelihood = normalization * mean ** (-0.5 * sum(random_variables ** 2))
     return likelihood
 
@@ -32,8 +35,7 @@ def uniform_prior():
     
     Parameters
     ----------
-    mean: float
-        Floating point number that specifies the mean. 
+    None
 
     Returns
     -------
@@ -65,27 +67,15 @@ def calc_posterior(mean, random_variables):
     return posterior
 
 
-random_variables = np.random.randn(100)
-
-ax = plt.subplot()
-a_values = np.linspace(1, 10, 1000)
-posterior = calc_posterior(a_values, random_variables)
-ax.plot(a_values, posterior)
-ax.set(xlabel="a", ylabel="belief", title="Posterior")
-max_y = max(posterior)
-max_x = a_values[posterior.argmax()]
-plt.show()
-
-
-def sampler(random_variables, samples, mu_init=5, proposal_width=0.25):
+def sampler(random_variables, nsamples, mu_init, proposal_width=0.25):
     """
     Function to calculate the posterior at a given point.
     
     Parameters
     ----------
-    random_variables: Numpy array
+    random_variables: array
         Array of floats which are drawn from a normal distribution. 
-    samples: integer
+    nsamples: integer
         Length of the chain    
     mu_init: float
         Floating point number that specifies the starting point. 
@@ -94,14 +84,14 @@ def sampler(random_variables, samples, mu_init=5, proposal_width=0.25):
 
     Returns
     -------
-    chain: Numpy array
+    chain: array
         The MCMC chain
     """
     mu_current = mu_init
     chain = [mu_current]
-    for _ in range(samples):
+    for _ in range(nsamples):
         # suggest new position
-        mu_proposal = norm(mu_current, proposal_width).rvs()
+        mu_proposal = np.random.normal(mu_current, proposal_width)
 
         posterior_current = calc_posterior(mu_current, random_variables)
         posterior_proposal = calc_posterior(mu_proposal, random_variables)
@@ -120,17 +110,35 @@ def sampler(random_variables, samples, mu_init=5, proposal_width=0.25):
     return np.array(chain)
 
 
-parameter = sampler(random_variables, samples=15000, mu_init=5)
+random_variables = np.random.randn(100)
 
-plt.plot(parameter)
-plt.title("Trace plot")
+plt.figure(1)
+ax = plt.subplot()
+a_values = np.linspace(1, 10, 1000)
+posterior = calc_posterior(a_values, random_variables)
+ax.plot(a_values, posterior)
+ax.set(xlabel="a", ylabel="belief", title="Posterior")
+max_y = max(posterior)
+max_x = a_values[posterior.argmax()]
 plt.show()
 
-plt.hist(parameter, density=True)
-plt.plot(a_values, posterior / np.sqrt(np.sum(posterior ** 2)))
-plt.axvline(x=np.mean(parameter), color="k", label="MCMC mean")
-plt.axvline(x=a_values[posterior.argmax()], color="r", label="Analytic mean")
+parameter = sampler(random_variables, nsamples=15000, mu_init=5)
+
+plt.figure(2)
+ax = plt.subplot()
+ax.plot(parameter)
+ax.set(xlabel="sample", ylabel="a", title="Trace plot")
+plt.show()
+
+plt.figure(3)
+ax = plt.subplot()
+ax.hist(parameter, bins=30, density=True)
+ax.plot(a_values, posterior / np.sqrt(np.sum(posterior ** 2)))
+ax.axvline(x=np.mean(parameter), color="k", label="MCMC mean")
+ax.axvline(x=a_values[posterior.argmax()], color="r", label="Analytic mean")
+ax.axvline(x=np.e, color="b", label="True mean")
 plt.legend()
 plt.show()
+
 
 print("The approximate value of e : " + str(np.mean(parameter)))
