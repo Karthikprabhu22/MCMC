@@ -132,6 +132,7 @@ plt.show()
 
 plt.figure(3)
 ax = plt.subplot()
+ax.set(xlabel="a", ylabel="belief", title="Posterior distribution")
 ax.hist(parameter, bins=30, density=True)
 ax.plot(a_values, posterior / np.sqrt(np.sum(posterior ** 2)))
 ax.axvline(x=np.mean(parameter), color="k", label="MCMC mean")
