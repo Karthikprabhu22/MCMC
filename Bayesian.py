@@ -4,6 +4,7 @@ This code uses Metropolis Hastings algorithm for sampling.
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import uniform
 
 
 def gaussian_likelihood(mean, random_variables):
@@ -24,18 +25,19 @@ def gaussian_likelihood(mean, random_variables):
         The likelihood evaluated at mean for the random_variables.
     """
     length = len(random_variables)
-    normalization = np.sqrt(np.log(abs(mean)) / 2 / np.pi) ** length
+    normalization = np.sqrt(np.log(mean) / 2 / np.pi) ** length
     likelihood = normalization * mean ** (-0.5 * sum(random_variables ** 2))
     return likelihood
 
 
-def uniform_prior():
+def uniform_prior(a):
     """
     Function to calculate the prior at a given point.
     
     Parameters
     ----------
-    None
+    a: The value for which you want to evaluate the prior.
+     
 
     Returns
     -------
@@ -43,7 +45,8 @@ def uniform_prior():
         The likelihood evaluated at mean for the random_variables.
     """
     e_guess = 2.7
-    prior = np.random.uniform(e_guess - 1, e_guess + 1)
+    scale = 1
+    prior = uniform(e_guess - scale, e_guess + scale).pdf(a)
     return prior
 
 
@@ -63,7 +66,7 @@ def calc_posterior(mean, random_variables):
     posterior: float
         The posterior evaluated at mean for the random_variables.
     """
-    posterior = gaussian_likelihood(mean, random_variables) * uniform_prior()
+    posterior = gaussian_likelihood(mean, random_variables) * uniform_prior(mean)
     return posterior
 
 
